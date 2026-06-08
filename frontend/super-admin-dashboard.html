@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Super Admin Suite — HEMA-KHI Portal</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+
+  <!-- Tailwind Theme overrides -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#760009",
+            "on-primary": "#ffffff",
+            "primary-container": "#991b1b",
+            "on-primary-container": "#ffaaa1",
+            "secondary": "#565e74",
+            "background": "#f8f9ff",
+            "on-background": "#0b1c30",
+            "surface": "#ffffff",
+            "on-surface": "#0b1c30",
+            "on-surface-variant": "#59413e",
+            "surface-container-low": "#eff4ff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#dce9ff",
+            "surface-container-highest": "#d3e4fe",
+            "outline": "#8d706d",
+            "outline-variant": "#e1bfbb",
+            "error": "#ba1a1a",
+            "on-error": "#ffffff"
+          },
+          borderRadius: {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          spacing: {
+            "base": "4px",
+            "gutter": "20px",
+            "xl": "40px",
+            "lg": "24px",
+            "sm": "8px",
+            "md": "16px",
+            "container-max": "1280px",
+            "margin": "24px",
+            "xs": "4px"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-background text-on-background font-sans min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- TopNavBar Shared Header -->
+  <header class="sticky top-0 z-50 flex justify-between items-center w-full px-margin h-16 bg-white border-b border-outline-variant">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+      <span class="text-md font-bold text-primary">HEMA-KHI Portal</span>
+    </div>
+    
+    <nav class="hidden md:flex gap-lg items-center h-full">
+      <a class="h-full flex items-center px-sm text-primary border-b-2 border-primary font-bold text-xs" href="#">Super Admin Suite</a>
+      <a class="h-full flex items-center px-sm text-on-surface-variant hover:text-primary transition-colors text-xs font-medium" href="/">Public Map</a>
+    </nav>
+
+    <div class="flex items-center gap-sm">
+      <div class="text-right hidden sm:block">
+        <p class="text-xs font-bold text-slate-900" id="user-display-name">Loading...</p>
+        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-wide">System Director</p>
+      </div>
+      <button onclick="Utils.logout()" class="ml-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-1.5 px-3 rounded-lg font-bold transition-colors">
+        Log Out
+      </button>
+    </div>
+  </header>
+
+  <div class="flex-grow max-w-container-max w-full mx-auto p-4 md:p-lg flex flex-col gap-6">
+    <!-- Page Header -->
+    <div>
+      <h1 class="text-2xl font-bold text-on-surface">Master Control Dashboard</h1>
+      <p class="text-sm text-on-surface-variant mt-1">Manage entity onboarding, verification permissions, and immutable system audit logs.</p>
+    </div>
+
+    <!-- Bento Grid Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Onboard Hospital Form (Col 1-4) -->
+      <div class="lg:col-span-4 bg-white border border-outline-variant rounded-xl p-md shadow-sm">
+        <h3 class="text-sm font-bold mb-4 flex items-center gap-2 text-slate-800 border-b pb-2">
+          <span class="material-symbols-outlined text-primary">add_home_work</span>
+          Onboard New Hospital
+        </h3>
+        <form id="hospital-form" class="space-y-3">
+          <div>
+            <label for="hosp-name" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Hospital Name</label>
+            <input id="hosp-name" type="text" required placeholder="e.g. Civil Hospital Karachi" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="hosp-code" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Short Code</label>
+              <input id="hosp-code" type="text" required placeholder="e.g. CHK" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none uppercase">
+            </div>
+            <div class="flex items-center pt-5">
+              <input id="hosp-gov" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-slate-300 rounded">
+              <label for="hosp-gov" class="ml-2 block text-xs text-slate-600 font-semibold">Government Run</label>
+            </div>
+          </div>
+          <div>
+            <label for="hosp-address" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Street Address</label>
+            <input id="hosp-address" type="text" required placeholder="e.g. Baba-e-Urdu Road, Saddar" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+          </div>
+          <div>
+            <label for="hosp-contact" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Contact Phone</label>
+            <input id="hosp-contact" type="text" required placeholder="e.g. (021) 99215740" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="hosp-lat" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Latitude</label>
+              <input id="hosp-lat" type="number" step="any" required value="24.8569" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+            </div>
+            <div>
+              <label for="hosp-lng" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Longitude</label>
+              <input id="hosp-lng" type="number" step="any" required value="67.0118" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+            </div>
+          </div>
+          <button type="submit" id="hospital-submit" class="w-full mt-3 bg-primary text-white py-2 rounded text-xs font-bold hover:bg-primary-container transition-colors">Onboard Hospital</button>
+        </form>
+      </div>
+
+      <!-- Onboard Blood Bank Form (Col 5-8) -->
+      <div class="lg:col-span-4 bg-white border border-outline-variant rounded-xl p-md shadow-sm">
+        <h3 class="text-sm font-bold mb-4 flex items-center gap-2 text-slate-800 border-b pb-2">
+          <span class="material-symbols-outlined text-primary">add_moderator</span>
+          Onboard New Blood Bank
+        </h3>
+        <form id="bank-form" class="space-y-3">
+          <div>
+            <label for="bank-name" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Blood Bank Name</label>
+            <input id="bank-name" type="text" required placeholder="e.g. Fatimid Foundation" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+          </div>
+          <div>
+            <label for="bank-branch" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Branch Name</label>
+            <input id="bank-branch" type="text" placeholder="e.g. Gulshan Branch" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+          </div>
+          <div>
+            <label for="bank-address" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Street Address</label>
+            <input id="bank-address" type="text" required placeholder="e.g. Block 15, Gulshan-e-Iqbal" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="bank-contact" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Contact Phone</label>
+              <input id="bank-contact" type="text" required placeholder="e.g. (021) 34812612" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+            </div>
+            <div>
+              <label for="bank-hours" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Operating Hours</label>
+              <input id="bank-hours" type="text" value="24/7" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="bank-lat" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Latitude</label>
+              <input id="bank-lat" type="number" step="any" required value="24.9122" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+            </div>
+            <div>
+              <label for="bank-lng" class="block text-[10px] font-bold text-slate-600 uppercase mb-1">Longitude</label>
+              <input id="bank-lng" type="number" step="any" required value="67.0895" class="w-full border border-slate-300 rounded-lg py-1.5 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+            </div>
+          </div>
+          <button type="submit" id="bank-submit" class="w-full mt-3 bg-primary text-white py-2 rounded text-xs font-bold hover:bg-primary-container transition-colors">Onboard Blood Bank</button>
+        </form>
+      </div>
+
+      <!-- Verification Control Queue (Col 9-12) -->
+      <div class="lg:col-span-4 bg-white border border-outline-variant rounded-xl p-md shadow-sm flex flex-col justify-between min-h-[350px]">
+        <div>
+          <h3 class="text-sm font-bold mb-4 flex items-center gap-2 text-slate-800 border-b pb-2">
+            <span class="material-symbols-outlined text-primary">verified_user</span>
+            Admin Verification Queue
+          </h3>
+          <div class="space-y-3 overflow-y-auto max-h-[280px] pr-1" id="verification-queue">
+            <!-- Dynamically populated list of unverified admins -->
+            <p class="text-xs text-slate-400 text-center py-6">All systems synced. Verification queue empty.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Section: Immutable Security Audit Logs (Full Width Terminal style) -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-md shadow-md flex flex-col overflow-hidden">
+      <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+        <h3 class="text-xs font-bold text-slate-300 flex items-center gap-2 uppercase tracking-wide">
+          <span class="material-symbols-outlined text-emerald-400 text-sm">terminal</span>
+          Immutable Audit Logs Viewer
+        </h3>
+        <button onclick="loadLogs()" class="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-0.5">
+          <span class="material-symbols-outlined text-[10px]">sync</span> Force Sync
+        </button>
+      </div>
+
+      <div class="bg-black/40 rounded p-4 font-mono text-xs overflow-x-auto h-[250px] overflow-y-auto text-emerald-500" id="audit-log-terminal">
+        <!-- Log items filled here -->
+        <p class="text-slate-500">[System Audit Ready. Fetching logs...]</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="w-full py-4 text-center text-[10px] text-slate-500 border-t border-outline-variant bg-white mt-8">
+    © 2026 Karachi Centralized Blood Bank Portal. Safeguarded logs.
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/js/utils.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    // Route guard
+    Utils.requireAuth(['super_admin']);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const activeUser = Utils.getCurrentUser();
+      document.getElementById('user-display-name').innerText = activeUser.name;
+
+      // 1. Handle Hospital Form Submit
+      const hospForm = document.getElementById('hospital-form');
+      hospForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('hosp-name').value;
+        const shortCode = document.getElementById('hosp-code').value;
+        const address = document.getElementById('hosp-address').value;
+        const contact = document.getElementById('hosp-contact').value;
+        const lat = parseFloat(document.getElementById('hosp-lat').value);
+        const lng = parseFloat(document.getElementById('hosp-lng').value);
+        const isGovernment = document.getElementById('hosp-gov').checked;
+
+        const submitBtn = document.getElementById('hospital-submit');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Onboarding...";
+
+        const data = {
+          name,
+          shortCode,
+          address,
+          contact,
+          location: {
+            coordinates: [lng, lat]
+          },
+          isGovernment
+        };
+
+        try {
+          const res = await API.createHospital(data);
+          if (res.success) {
+            Utils.showToast(`Hospital "${name}" successfully onboarded!`, 'success');
+            hospForm.reset();
+            // Reset coordinates to default
+            document.getElementById('hosp-lat').value = "24.8569";
+            document.getElementById('hosp-lng').value = "67.0118";
+            loadLogs(); // refresh audit logs
+          }
+        } catch (err) {
+          Utils.showToast(err.message || 'Hospital onboarding failed.', 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Onboard Hospital";
+        }
+      });
+
+      // 2. Handle Blood Bank Form Submit
+      const bankForm = document.getElementById('bank-form');
+      bankForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('bank-name').value;
+        const branch = document.getElementById('bank-branch').value;
+        const address = document.getElementById('bank-address').value;
+        const contact = document.getElementById('bank-contact').value;
+        const operatingHours = document.getElementById('bank-hours').value;
+        const lat = parseFloat(document.getElementById('bank-lat').value);
+        const lng = parseFloat(document.getElementById('bank-lng').value);
+
+        const submitBtn = document.getElementById('bank-submit');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Onboarding...";
+
+        const data = {
+          name,
+          branch,
+          address,
+          contact,
+          operatingHours,
+          location: {
+            coordinates: [lng, lat]
+          }
+        };
+
+        try {
+          const res = await API.createBloodBank(data);
+          if (res.success) {
+            Utils.showToast(`Blood bank node "${name}" successfully onboarded!`, 'success');
+            bankForm.reset();
+            // Reset coordinates to default
+            document.getElementById('bank-lat').value = "24.9122";
+            document.getElementById('bank-lng').value = "67.0895";
+            document.getElementById('bank-hours').value = "24/7";
+            loadLogs(); // refresh audit logs
+          }
+        } catch (err) {
+          Utils.showToast(err.message || 'Blood bank onboarding failed.', 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Onboard Blood Bank";
+        }
+      });
+
+      // 3. Load Verification Queue
+      async function loadVerificationQueue() {
+        const queueDiv = document.getElementById('verification-queue');
+        try {
+          // Retrieve users and filter verified = false
+          const res = await API.getAllUsers({ verified: false });
+          if (res.success && res.data.length > 0) {
+            // Filter out donors and super admin, focus on blood bank/hospital admins
+            const pendingAdmins = res.data.filter(u => u.role === 'blood_bank_admin' || u.role === 'hospital_admin');
+            
+            if (pendingAdmins.length > 0) {
+              let html = '';
+              pendingAdmins.forEach(admin => {
+                html += `
+                  <div class="p-3 border border-slate-200 rounded-lg flex flex-col justify-between gap-2 bg-slate-50">
+                    <div>
+                      <p class="font-bold text-slate-800 text-xs">${admin.name}</p>
+                      <p class="text-[10px] text-slate-500">${admin.email}</p>
+                      <span class="mt-1 inline-block text-[9px] bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded uppercase border border-sky-200">
+                        Role: ${admin.role.replace('_', ' ')}
+                      </span>
+                    </div>
+                    <button onclick="verifyUser('${admin._id}', '${admin.name}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold py-1 px-2 rounded transition-colors shadow-sm">
+                      Approve & Verify Account
+                    </button>
+                  </div>
+                `;
+              });
+              queueDiv.innerHTML = html;
+            } else {
+              queueDiv.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">All systems synced. Verification queue empty.</p>`;
+            }
+          } else {
+            queueDiv.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">All systems synced. Verification queue empty.</p>`;
+          }
+        } catch (e) {
+          queueDiv.innerHTML = `<p class="text-xs text-rose-500 text-center py-6">Failed to load verification queue.</p>`;
+        }
+      }
+
+      // Action: Verify User
+      window.verifyUser = async (id, name) => {
+        try {
+          const res = await API.verifyUser(id);
+          if (res.success) {
+            Utils.showToast(`User "${name}" verified successfully!`, 'success');
+            loadVerificationQueue();
+            loadLogs();
+          }
+        } catch (e) {
+          Utils.showToast('Failed to verify user: ' + e.message, 'error');
+        }
+      };
+
+      // 4. Load Audit Logs (Terminal output)
+      window.loadLogs = async () => {
+        const terminal = document.getElementById('audit-log-terminal');
+        try {
+          const res = await API.getAuditLogs({ limit: 100 });
+          if (res.success && res.data.length > 0) {
+            let html = '<ul class="space-y-1">';
+            res.data.forEach(log => {
+              const time = new Date(log.timestamp).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+              const date = new Date(log.timestamp).toLocaleDateString('en-PK', { month: '2-digit', day: '2-digit' });
+              
+              // Color actions differently
+              let actionColor = 'text-slate-400';
+              if (log.action.includes('LOGIN')) actionColor = 'text-sky-400 font-bold';
+              else if (log.action.includes('CREATE') || log.action.includes('ONBOARD')) actionColor = 'text-yellow-400';
+              else if (log.action.includes('COMPLETE')) actionColor = 'text-emerald-400 font-bold';
+              else if (log.action.includes('FAILED')) actionColor = 'text-rose-400 font-bold';
+              else if (log.action.includes('VERIFY')) actionColor = 'text-teal-300 font-bold';
+
+              const userName = log.userId ? log.userId.name : 'System';
+
+              html += `
+                <li class="flex gap-2">
+                  <span class="text-slate-500 shrink-0">[${date} ${time}]</span>
+                  <span class="${actionColor} shrink-0 w-44 font-semibold">${log.action}</span>
+                  <span class="text-slate-300">User: <b class="text-slate-200">${userName}</b> (Target ID: ${log.targetDocumentId ? log.targetDocumentId.slice(-6).toUpperCase() : 'N/A'})</span>
+                </li>
+              `;
+            });
+            html += '</ul>';
+            terminal.innerHTML = html;
+          } else {
+            terminal.innerHTML = `<p class="text-slate-500">[No audit log records found in database]</p>`;
+          }
+        } catch (e) {
+          terminal.innerHTML = `<p class="text-rose-500">[Error fetching system audit logs from database]</p>`;
+        }
+      };
+
+      // Initialize
+      loadVerificationQueue();
+      loadLogs();
+    });
+  </script>
+</body>
+</html>

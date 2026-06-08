@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Bank Admin Dashboard — HEMA-KHI Portal</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+
+  <!-- Tailwind Theme overrides -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#760009",
+            "on-primary": "#ffffff",
+            "primary-container": "#991b1b",
+            "on-primary-container": "#ffaaa1",
+            "secondary": "#565e74",
+            "background": "#f8f9ff",
+            "on-background": "#0b1c30",
+            "surface": "#ffffff",
+            "on-surface": "#0b1c30",
+            "on-surface-variant": "#59413e",
+            "surface-container-low": "#eff4ff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#dce9ff",
+            "surface-container-highest": "#d3e4fe",
+            "outline": "#8d706d",
+            "outline-variant": "#e1bfbb",
+            "error": "#ba1a1a",
+            "on-error": "#ffffff"
+          },
+          borderRadius: {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          spacing: {
+            "base": "4px",
+            "gutter": "20px",
+            "xl": "40px",
+            "lg": "24px",
+            "sm": "8px",
+            "md": "16px",
+            "container-max": "1280px",
+            "margin": "24px",
+            "xs": "4px"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-background text-on-background font-sans min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- TopNavBar Shared Header -->
+  <header class="sticky top-0 z-50 flex justify-between items-center w-full px-margin h-16 bg-white border-b border-outline-variant">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+      <span class="text-md font-bold text-primary">HEMA-KHI Portal</span>
+    </div>
+    
+    <nav class="hidden md:flex gap-lg items-center h-full">
+      <a class="h-full flex items-center px-sm text-primary border-b-2 border-primary font-bold text-xs" href="#">Bank Inventory Dashboard</a>
+      <a class="h-full flex items-center px-sm text-on-surface-variant hover:text-primary transition-colors text-xs font-medium" href="/">Public Map</a>
+    </nav>
+
+    <div class="flex items-center gap-sm">
+      <div class="text-right hidden sm:block">
+        <p class="text-xs font-bold text-slate-900" id="user-display-name">Loading...</p>
+        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-wide" id="user-entity-branch">Blood Bank Admin</p>
+      </div>
+      <button onclick="Utils.logout()" class="ml-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-1.5 px-3 rounded-lg font-bold transition-colors">
+        Log Out
+      </button>
+    </div>
+  </header>
+
+  <div class="flex-grow max-w-container-max w-full mx-auto p-4 md:p-lg flex flex-col gap-6">
+    <!-- Page Header -->
+    <div>
+      <h1 class="text-2xl font-bold text-on-surface" id="bank-title-name">Blood Bank Dashboard</h1>
+      <p class="text-sm text-on-surface-variant mt-1">Manage blood unit storage, alert thresholds, and donor appointments.</p>
+    </div>
+
+    <!-- Main Grid Layout -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <!-- Left Column: Inventory Stock Grid (Bento) -->
+      <div class="xl:col-span-2 space-y-6">
+        <div class="bg-white border border-outline-variant rounded-xl p-md">
+          <h3 class="text-md font-bold mb-4 flex items-center gap-2 text-slate-800">
+            <span class="material-symbols-outlined text-primary">water_drop</span>
+            Storage Stock Management
+          </h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" id="inventory-grid">
+            <!-- Dynamically populated stock cards -->
+            <p class="text-xs text-slate-400 py-6 text-center col-span-4">Loading inventory data...</p>
+          </div>
+        </div>
+
+        <!-- Emergency Hospital Needs -->
+        <section class="border-2 border-rose-200 bg-rose-50 rounded-xl p-md shadow-sm" aria-labelledby="emergency-needs-title">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div>
+              <h3 id="emergency-needs-title" class="text-base font-black text-rose-950 flex items-center gap-2 uppercase tracking-wide">
+                <span class="material-symbols-outlined text-rose-700" style="font-variation-settings: 'FILL' 1;">emergency</span>
+                Emergency Hospital Needs
+              </h3>
+              <p class="text-xs text-rose-800 mt-1">Live city-wide hospital requests that need blood bank action.</p>
+            </div>
+            <span class="bg-rose-700 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider" id="emergency-needs-count">
+              Syncing
+            </span>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3" id="emergency-needs-grid">
+            <div class="bg-white border border-rose-100 rounded-lg p-4 text-xs text-rose-700 font-bold">
+              Loading hospital emergency requests...
+            </div>
+          </div>
+        </section>
+
+        <!-- Appointment / Inbound Donors Reservation Queue -->
+        <div class="bg-white border border-outline-variant rounded-xl p-md">
+          <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">group_add</span>
+              Donor Appointment Queue
+            </h3>
+            <span class="text-[10px] text-slate-500 font-bold" id="queue-count">0 Scheduled</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold">
+                  <th class="p-3">Reference ID</th>
+                  <th class="p-3">Donor Name</th>
+                  <th class="p-3">Blood Type</th>
+                  <th class="p-3">Scheduled Date</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3 text-right">Fulfillment Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700" id="inbound-donors-body">
+                <tr>
+                  <td colspan="6" class="p-4 text-center text-slate-400">No appointments in queue.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Configurations -->
+      <div class="space-y-6">
+        <!-- Configuration Card -->
+        <div class="bg-white border border-outline-variant rounded-xl p-md">
+          <h3 class="text-sm font-bold mb-2 flex items-center gap-2 text-slate-800">
+            <span class="material-symbols-outlined text-primary">settings_applications</span>
+            Alert Threshold Configuration
+          </h3>
+          <p class="text-xs text-on-surface-variant mb-4">
+            Minimum inventory bounds to trigger critical shortages. Editing requires Super Admin clearance.
+          </p>
+
+          <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 border border-slate-200 rounded bg-slate-50">
+              <span class="text-xs font-bold text-slate-700">Universal Donor (O-) Limit</span>
+              <span class="text-xs font-bold text-slate-800" id="o-threshold-val">10 units</span>
+            </div>
+            <div class="flex items-center justify-between p-3 border border-slate-200 rounded bg-slate-50">
+              <span class="text-xs font-bold text-slate-700">General Type Limit</span>
+              <span class="text-xs font-bold text-slate-800" id="gen-threshold-val">10 units</span>
+            </div>
+          </div>
+          <button disabled class="w-full mt-4 bg-slate-100 text-slate-400 border border-slate-200 py-2 rounded text-xs font-bold cursor-not-allowed">
+            Save Thresholds (View Only)
+          </button>
+        </div>
+
+        <!-- Audit log teaser -->
+        <div class="bg-white border border-outline-variant rounded-xl p-md">
+          <h3 class="text-xs font-bold mb-2 text-slate-800 uppercase tracking-wide">Facility Overview</h3>
+          <div class="space-y-2 text-xs text-slate-600" id="facility-details">
+            <p><b>Address:</b> Loading...</p>
+            <p><b>Contact:</b> Loading...</p>
+            <p><b>Operating Hours:</b> Loading...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="w-full py-4 text-center text-[10px] text-slate-500 border-t border-outline-variant bg-white mt-8">
+    © 2026 Karachi Centralized Blood Bank Portal. Safeguarded logs.
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/js/utils.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    // Route guard
+    Utils.requireAuth(['blood_bank_admin']);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let activeUser = Utils.getCurrentUser();
+      let bankId = null;
+
+      // Populate basic info
+      document.getElementById('user-display-name').innerText = activeUser.name;
+
+      // Sync Profile & Get associated Bank details
+      async function syncData() {
+        try {
+          const profileRes = await API.getMe();
+          if (profileRes.success && profileRes.data.user) {
+            const user = profileRes.data.user;
+            localStorage.setItem('user', JSON.stringify(user));
+
+            const associatedBank = user.associatedEntityId;
+            const resolvedBankId = typeof associatedBank === 'object' && associatedBank !== null
+              ? associatedBank._id
+              : associatedBank;
+
+            if (!resolvedBankId) {
+              Utils.showToast('Error: No blood bank associated with your profile.', 'error');
+              return;
+            }
+
+            bankId = resolvedBankId;
+
+            // Fetch full bank details
+            const bankRes = await API.getBloodBank(bankId);
+            if (!bankRes.success || !bankRes.data) {
+              Utils.showToast('Error: Could not load blood bank details.', 'error');
+              return;
+            }
+
+            const bank = bankRes.data;
+
+            // Populate branch and details
+            document.getElementById('user-entity-branch').innerText = `${bank.name} Admin`;
+            document.getElementById('bank-title-name').innerText = `${bank.name} (${bank.branch || 'Main Branch'})`;
+            
+            document.getElementById('o-threshold-val').innerText = `${bank.alertThreshold} units`;
+            document.getElementById('gen-threshold-val').innerText = `${bank.alertThreshold} units`;
+
+            document.getElementById('facility-details').innerHTML = `
+              <p><b>Address:</b> ${bank.address}</p>
+              <p><b>Contact:</b> ${bank.contact}</p>
+              <p><b>Operating Hours:</b> ${bank.operatingHours}</p>
+            `;
+
+            // Load Inventory Card Grid
+            renderInventory(bank.inventory, bank.alertThreshold);
+            // Load Emergency Hospital Requests
+            loadEmergencyNeeds(bank.inventory, bank.alertThreshold);
+            // Load Appointments
+            loadAppointments();
+          }
+        } catch (e) {
+          console.error(e);
+          Utils.showToast('Failed to retrieve blood bank details.', 'error');
+        }
+      }
+
+      function renderInventory(inventory, threshold) {
+        const grid = document.getElementById('inventory-grid');
+        if (!inventory) {
+          grid.innerHTML = '<p class="text-xs text-slate-400 py-6 text-center col-span-4">Empty Inventory</p>';
+          return;
+        }
+
+        // Define standard blood types
+        const types = [
+          'A_positive', 'A_negative',
+          'B_positive', 'B_negative',
+          'AB_positive', 'AB_negative',
+          'O_positive', 'O_negative'
+        ];
+
+        let html = '';
+        types.forEach(type => {
+          const entry = inventory[type] || { units: 0 };
+          const units = entry.units;
+          
+          let statusLabel = 'Full';
+          let statusClass = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+          let icon = 'check_circle';
+          let borderClass = 'border-outline-variant hover:border-slate-300';
+          let headerColor = 'text-slate-800';
+
+          if (units <= threshold) {
+            statusLabel = 'Critical';
+            statusClass = 'bg-rose-100 text-rose-800 border-rose-200 animate-pulse';
+            icon = 'warning';
+            borderClass = 'border-rose-300 bg-rose-50/20';
+            headerColor = 'text-rose-900';
+          } else if (units < threshold * 2) {
+            statusLabel = 'Low';
+            statusClass = 'bg-amber-100 text-amber-800 border-amber-200';
+            icon = 'info';
+            borderClass = 'border-amber-300';
+          }
+
+          html += `
+            <div class="bg-white border ${borderClass} rounded-lg p-3 flex flex-col relative overflow-hidden group">
+              <div class="flex justify-between items-start z-10 relative">
+                <span class="text-lg font-bold ${headerColor}">${Utils.formatBloodType(type)}</span>
+                <span class="${statusClass} text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 border">
+                  <span class="material-symbols-outlined text-[10px]">${icon}</span> ${statusLabel}
+                </span>
+              </div>
+              <div class="mt-4 z-10 relative flex-grow flex flex-col justify-end">
+                <div class="text-2xl font-bold ${units <= threshold ? 'text-rose-900' : 'text-slate-800'}">
+                  ${units} <span class="text-xs font-normal text-slate-500">units</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
+                  <div class="h-full ${units <= threshold ? 'bg-rose-600' : units < threshold * 2 ? 'bg-amber-500' : 'bg-emerald-500'}" style="width: ${Math.min(100, (units / (threshold * 3)) * 100)}%;"></div>
+                </div>
+              </div>
+              <div class="mt-4 flex gap-1.5 z-10 relative border-t border-slate-100 pt-3">
+                <button onclick="changeStock('${type}', ${units}, -1)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-1 rounded text-xs font-bold transition-all">-</button>
+                <button onclick="changeStock('${type}', ${units}, 1)" class="flex-1 bg-primary text-on-primary py-1 rounded hover:bg-primary-container transition-all text-xs font-bold">+</button>
+              </div>
+            </div>
+          `;
+        });
+        grid.innerHTML = html;
+      }
+
+      // Trigger stock modification
+      window.changeStock = async (type, currentUnits, delta) => {
+        const newUnits = currentUnits + delta;
+        if (newUnits < 0) {
+          Utils.showToast('Stock units cannot be less than zero.', 'warning');
+          return;
+        }
+
+        try {
+          const res = await API.updateInventory(bankId, type, newUnits);
+          if (res.success) {
+            Utils.showToast(`Inventory updated for ${Utils.formatBloodType(type)}.`, 'success');
+            // Refresh dashboard
+            syncData();
+          }
+        } catch (e) {
+          Utils.showToast('Failed to modify inventory: ' + e.message, 'error');
+        }
+      };
+
+      async function loadEmergencyNeeds(inventory = {}, threshold = 10) {
+        const grid = document.getElementById('emergency-needs-grid');
+        const count = document.getElementById('emergency-needs-count');
+
+        try {
+          const res = await API.getAllRequests();
+          const requests = res.success ? res.data.filter(req => req.status !== 'Closed') : [];
+
+          if (requests.length === 0) {
+            count.innerText = '0 Active';
+            grid.innerHTML = `
+              <div class="bg-white border border-emerald-200 rounded-lg p-4 text-xs text-emerald-700 font-bold lg:col-span-2 flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                No active hospital emergency requests city-wide.
+              </div>
+            `;
+            return;
+          }
+
+          const urgencyRank = { Critical: 0, Urgent: 1, Normal: 2 };
+          requests.sort((a, b) => (urgencyRank[a.urgency] ?? 9) - (urgencyRank[b.urgency] ?? 9));
+          count.innerText = `${requests.length} Active`;
+
+          grid.innerHTML = requests.map(req => {
+            const unitsNeeded = Math.max(0, (req.unitsRequested || 0) - (req.unitsFulfilled || 0));
+            const stockEntry = inventory[req.bloodTypeRequired] || { units: 0 };
+            const localUnits = stockEntry.units || 0;
+            const canHelp = localUnits > threshold;
+            const urgencyClass = req.urgency === 'Critical'
+              ? 'bg-rose-700 text-white'
+              : req.urgency === 'Urgent'
+              ? 'bg-amber-500 text-slate-950'
+              : 'bg-slate-700 text-white';
+            const borderClass = req.urgency === 'Critical'
+              ? 'border-rose-300'
+              : req.urgency === 'Urgent'
+              ? 'border-amber-300'
+              : 'border-slate-200';
+            const hospitalName = req.hospitalId
+              ? `${req.hospitalId.name} (${req.hospitalId.shortCode})`
+              : 'Unknown Hospital';
+            const ward = req.patientInfo ? req.patientInfo.wardOrDept || 'General' : 'General';
+            const caseType = req.patientInfo ? req.patientInfo.caseType.replace('_', ' ') : 'Emergency';
+
+            return `
+              <article class="bg-white border ${borderClass} rounded-lg p-4 shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="text-sm font-black text-slate-950 leading-tight">${hospitalName}</p>
+                    <p class="text-[11px] text-slate-500 mt-1">${caseType} - ${ward}</p>
+                  </div>
+                  <span class="${urgencyClass} text-[10px] font-black uppercase px-2 py-1 rounded tracking-wide shrink-0">${req.urgency}</span>
+                </div>
+                <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+                  <div class="bg-rose-50 border border-rose-100 rounded p-2">
+                    <p class="text-[10px] text-rose-700 font-bold uppercase">Blood</p>
+                    <p class="text-lg font-black text-rose-900">${Utils.formatBloodType(req.bloodTypeRequired)}</p>
+                  </div>
+                  <div class="bg-slate-50 border border-slate-100 rounded p-2">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase">Needed</p>
+                    <p class="text-lg font-black text-slate-900">${unitsNeeded}</p>
+                  </div>
+                  <div class="${canHelp ? 'bg-emerald-50 border-emerald-100' : 'bg-amber-50 border-amber-100'} border rounded p-2">
+                    <p class="text-[10px] ${canHelp ? 'text-emerald-700' : 'text-amber-700'} font-bold uppercase">Here</p>
+                    <p class="text-lg font-black ${canHelp ? 'text-emerald-800' : 'text-amber-800'}">${localUnits}</p>
+                  </div>
+                </div>
+                <p class="mt-3 text-[11px] font-bold ${canHelp ? 'text-emerald-700' : 'text-amber-700'}">
+                  ${canHelp ? 'Your bank has stock above threshold for this need.' : 'Your bank is low on this type; donor response is needed.'}
+                </p>
+              </article>
+            `;
+          }).join('');
+        } catch (e) {
+          console.error(e);
+          count.innerText = 'Error';
+          grid.innerHTML = `
+            <div class="bg-white border border-rose-200 rounded-lg p-4 text-xs text-rose-700 font-bold lg:col-span-2">
+              Failed to load hospital emergency requests.
+            </div>
+          `;
+        }
+      }
+
+      // Load Bank Appointments
+      async function loadAppointments() {
+        const tbody = document.getElementById('inbound-donors-body');
+        try {
+          const res = await API.getBankAppointments(bankId);
+          if (res.success && res.data.length > 0) {
+            document.getElementById('queue-count').innerText = `${res.data.length} Scheduled`;
+            let html = '';
+            
+            res.data.forEach(appt => {
+              const dateStr = Utils.formatDate(appt.scheduledDate);
+              const statusLower = appt.status.toLowerCase();
+              const statusClass = statusLower === 'completed'
+                ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                : statusLower === 'confirmed'
+                ? 'bg-sky-100 text-sky-800 border-sky-200'
+                : statusLower === 'pending'
+                ? 'bg-slate-100 text-slate-800 border-slate-200'
+                : 'bg-rose-100 text-rose-800 border-rose-200';
+
+              // Decide actions based on current status
+              let actionsHtml = '';
+              if (statusLower === 'pending') {
+                actionsHtml = `
+                  <button onclick="updateStatus('${appt._id}', 'Confirmed')" class="bg-sky-600 text-white px-2.5 py-1 rounded hover:bg-sky-700 transition-colors text-[10px] font-bold mr-1">Confirm Check-In</button>
+                  <button onclick="updateStatus('${appt._id}', 'Cancelled')" class="bg-slate-100 text-slate-600 px-2 py-1 rounded hover:bg-slate-200 transition-colors text-[10px] font-medium">Cancel</button>
+                `;
+              } else if (statusLower === 'confirmed') {
+                actionsHtml = `
+                  <button onclick="updateStatus('${appt._id}', 'Completed')" class="bg-emerald-600 text-white px-2.5 py-1 rounded hover:bg-emerald-700 transition-colors text-[10px] font-bold mr-1">Complete Donation</button>
+                  <button onclick="updateStatus('${appt._id}', 'Cancelled')" class="bg-slate-100 text-slate-600 px-2 py-1 rounded hover:bg-slate-200 transition-colors text-[10px] font-medium">Cancel</button>
+                `;
+              } else {
+                actionsHtml = `<span class="text-slate-400 font-bold text-[10px] uppercase">${appt.status}</span>`;
+              }
+
+              html += `
+                <tr class="hover:bg-slate-50 transition-colors">
+                  <td class="p-3 font-mono font-bold text-slate-900">${appt._id.slice(-6).toUpperCase()}</td>
+                  <td class="p-3">
+                    <p class="font-bold text-slate-800">${appt.donorId ? appt.donorId.name : 'Unknown Donor'}</p>
+                    <p class="text-[10px] text-slate-500">${appt.donorId ? appt.donorId.phone : ''}</p>
+                  </td>
+                  <td class="p-3"><span class="font-bold text-primary">${Utils.formatBloodType(appt.bloodType)}</span></td>
+                  <td class="p-3 font-medium text-slate-500">${dateStr}</td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 border text-[10px] font-bold uppercase rounded ${statusClass}">
+                      ${appt.status}
+                    </span>
+                  </td>
+                  <td class="p-3 text-right">${actionsHtml}</td>
+                </tr>
+              `;
+            });
+            tbody.innerHTML = html;
+          } else {
+            document.getElementById('queue-count').innerText = '0 Scheduled';
+            tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">No donor appointments scheduled in queue.</td></tr>`;
+          }
+        } catch (e) {
+          tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-rose-500">Failed to load appointments queue.</td></tr>`;
+        }
+      }
+
+      // Update appointment status
+      window.updateStatus = async (apptId, newStatus) => {
+        try {
+          const res = await API.updateAppointmentStatus(apptId, newStatus);
+          if (res.success) {
+            Utils.showToast(`Appointment status updated to ${newStatus}.`, 'success');
+            // Refresh views
+            syncData();
+          }
+        } catch (e) {
+          Utils.showToast('Failed to transition status: ' + e.message, 'error');
+        }
+      };
+
+      // Initial Sync
+      syncData();
+    });
+  </script>
+</body>
+</html>

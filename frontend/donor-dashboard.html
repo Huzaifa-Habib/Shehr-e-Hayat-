@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Donor Portal — HEMA-KHI Portal</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+
+  <!-- Tailwind Theme overrides -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#760009",
+            "on-primary": "#ffffff",
+            "primary-container": "#991b1b",
+            "on-primary-container": "#ffaaa1",
+            "secondary": "#565e74",
+            "background": "#f8f9ff",
+            "on-background": "#0b1c30",
+            "surface": "#ffffff",
+            "on-surface": "#0b1c30",
+            "on-surface-variant": "#59413e",
+            "surface-container-low": "#eff4ff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#dce9ff",
+            "surface-container-highest": "#d3e4fe",
+            "outline": "#8d706d",
+            "outline-variant": "#e1bfbb",
+            "error": "#ba1a1a",
+            "on-error": "#ffffff",
+            "tertiary-container": "#e6fffa",
+            "on-tertiary-container": "#006d5b",
+            "tertiary-fixed-dim": "#a3ebd6"
+          },
+          borderRadius: {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          spacing: {
+            "base": "4px",
+            "gutter": "20px",
+            "xl": "40px",
+            "lg": "24px",
+            "sm": "8px",
+            "md": "16px",
+            "container-max": "1280px",
+            "margin": "24px",
+            "xs": "4px"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-background text-on-background font-sans min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- TopNavBar Shared Header -->
+  <header class="sticky top-0 z-50 flex justify-between items-center w-full px-margin h-16 bg-white border-b border-outline-variant">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+      <span class="text-md font-bold text-primary">HEMA-KHI Portal</span>
+    </div>
+    
+    <nav class="hidden md:flex gap-lg items-center h-full">
+      <a class="h-full flex items-center px-sm text-primary border-b-2 border-primary font-bold text-xs" href="#">Donor Dashboard</a>
+      <a class="h-full flex items-center px-sm text-on-surface-variant hover:text-primary transition-colors text-xs font-medium" href="/">Public Map</a>
+    </nav>
+
+    <div class="flex items-center gap-sm">
+      <div class="text-right hidden sm:block">
+        <p class="text-xs font-bold text-slate-900" id="user-display-name">Loading...</p>
+        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-wide">Voluntary Donor</p>
+      </div>
+      <button onclick="Utils.logout()" class="ml-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-1.5 px-3 rounded-lg font-bold transition-colors">
+        Log Out
+      </button>
+    </div>
+  </header>
+
+  <div class="flex-grow max-w-container-max w-full mx-auto p-4 md:p-lg flex flex-col gap-6">
+    <!-- Page Header -->
+    <div>
+      <h1 class="text-2xl font-bold text-on-surface">Welcome Back, <span id="donor-greeting-name">Donor</span></h1>
+      <p class="text-sm text-on-surface-variant mt-1">Review your eligibility, schedule donation appointments, and view your historical impact.</p>
+    </div>
+
+    <!-- Main Bento Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+      
+      <!-- Eligibility Tracker (Col 1-4) -->
+      <div class="col-span-1 md:col-span-4 bg-white border border-outline-variant rounded-xl p-lg flex flex-col justify-between shadow-sm relative overflow-hidden min-h-[320px]">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-primary-container opacity-5 rounded-bl-full -z-0"></div>
+        
+        <div class="relative z-10 flex justify-between items-start mb-4">
+          <div>
+            <h3 class="text-sm font-bold text-on-surface">Donation Eligibility</h3>
+            <p class="text-[10px] text-on-surface-variant">90-Day Cooldown Cooldown</p>
+          </div>
+          <!-- Blood Type Badge -->
+          <div class="bg-primary text-on-primary w-12 h-12 rounded-xl border border-primary-container flex flex-col items-center justify-center shadow-md">
+            <span class="text-xs font-medium leading-none uppercase">Type</span>
+            <span class="text-sm font-bold tracking-tight mt-0.5" id="user-blood-type">-</span>
+          </div>
+        </div>
+
+        <!-- Circular Progress Bar -->
+        <div class="relative z-10 flex justify-center items-center py-2">
+          <div class="relative w-36 h-36">
+            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              <circle class="text-slate-100 stroke-current" cx="50" cy="50" fill="transparent" r="40" stroke-width="8"></circle>
+              <circle class="text-primary stroke-current" cx="50" cy="50" fill="transparent" r="40" stroke-linecap="round" stroke-width="8"
+                id="eligibility-ring" stroke-dasharray="251.2" stroke-dashoffset="0" style="transition: stroke-dashoffset 1s ease-in-out;"></circle>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+              <span class="text-2xl font-bold text-primary" id="eligibility-days">0</span>
+              <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider mt-0.5" id="eligibility-subtitle">Days Left</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative z-10 mt-4 border-t border-slate-100 pt-3">
+          <div class="flex justify-between items-center text-[10px] text-slate-500">
+            <span>Last Donation: <span class="font-bold text-slate-800" id="last-donation-date">Never</span></span>
+            <span>Next Eligible: <span class="font-bold text-primary" id="eligible-date">Eligible Now</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scheduling Form (Col 5-12) -->
+      <div class="col-span-1 md:col-span-8 bg-white border border-outline-variant rounded-xl p-lg shadow-sm flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
+            <span class="material-symbols-outlined text-primary">calendar_month</span>
+            <h3 class="text-sm font-bold text-on-surface">Book Donation Appointment</h3>
+          </div>
+          
+          <form id="appointment-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Details -->
+            <div class="space-y-4">
+              <div>
+                <label for="booking-bank" class="block text-xs font-bold text-slate-600 uppercase mb-1">Select Blood Bank Facility</label>
+                <select id="booking-bank" required class="w-full border border-slate-300 rounded-lg py-2 px-3 text-xs bg-white text-slate-800 focus:ring-primary focus:border-primary outline-none">
+                  <option value="">Fetching active locations...</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="booking-date" class="block text-xs font-bold text-slate-600 uppercase mb-1">Preferred Date</label>
+                <input id="booking-date" type="date" required class="w-full border border-slate-300 rounded-lg py-2 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+              </div>
+            </div>
+
+            <!-- Slots & Notes -->
+            <div class="space-y-4 flex flex-col justify-between">
+              <div>
+                <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Available Time Slot</label>
+                <div class="grid grid-cols-3 gap-2" id="slots-container">
+                  <button type="button" class="slot-btn py-1.5 border border-slate-300 rounded text-xs hover:border-primary focus:outline-none" data-time="09:00 AM">09:00 AM</button>
+                  <button type="button" class="slot-btn py-1.5 border border-slate-300 rounded text-xs hover:border-primary focus:outline-none" data-time="10:30 AM">10:30 AM</button>
+                  <button type="button" class="slot-btn py-1.5 border border-slate-300 rounded text-xs hover:border-primary focus:outline-none" data-time="12:00 PM">12:00 PM</button>
+                  <button type="button" class="slot-btn py-1.5 border border-slate-300 rounded text-xs hover:border-primary focus:outline-none" data-time="01:30 PM">01:30 PM</button>
+                  <button type="button" class="slot-btn py-1.5 border border-slate-300 rounded text-xs hover:border-primary focus:outline-none" data-time="03:00 PM">03:00 PM</button>
+                  <button type="button" class="slot-btn py-1.5 border border-slate-300 rounded text-xs hover:border-primary focus:outline-none" data-time="04:30 PM">04:30 PM</button>
+                </div>
+                <input type="hidden" id="booking-slot" required>
+              </div>
+
+              <div>
+                <label for="booking-notes" class="block text-xs font-bold text-slate-600 uppercase mb-1">Special Notes (Optional)</label>
+                <input id="booking-notes" type="text" placeholder="e.g. Fasting details, allergies, requests" class="w-full border border-slate-300 rounded-lg py-2 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <button type="submit" form="appointment-form" id="submit-booking-btn" class="w-full mt-6 bg-primary text-on-primary py-2.5 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors shadow-sm flex items-center justify-center gap-1">
+          <span class="material-symbols-outlined text-sm">event_available</span>
+          Confirm Appointment Schedule
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Requests Notice + Historical Ledger -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+      
+      <!-- Hotspots & Needs (Col 1-4) -->
+      <div class="col-span-1 md:col-span-4 bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm flex flex-col">
+        <div class="p-4 border-b border-outline-variant bg-surface flex justify-between items-center">
+          <h3 class="text-xs font-bold text-slate-800 flex items-center gap-1">
+            <span class="material-symbols-outlined text-primary text-sm">location_on</span>
+            Local Shortage Alerts
+          </h3>
+          <span class="bg-primary text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Active</span>
+        </div>
+        <div class="p-4 flex-1 flex flex-col gap-3 max-h-[260px] overflow-y-auto" id="shortages-hotspots">
+          <!-- Dynamically populated shortages -->
+          <p class="text-xs text-slate-400 text-center py-6">All facilities report stable levels for your blood type.</p>
+        </div>
+      </div>
+
+      <!-- Historical Ledger (Col 5-12) -->
+      <div class="col-span-1 md:col-span-8 bg-white border border-outline-variant rounded-xl shadow-sm flex flex-col overflow-hidden">
+        <div class="p-4 border-b border-outline-variant flex justify-between items-center bg-white">
+          <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">history</span>
+            Personal Donation Ledger
+          </h3>
+          <span class="text-[10px] text-slate-500 font-bold" id="appointments-count">0 donations</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold">
+                <th class="p-3">Reference ID</th>
+                <th class="p-3">Location Bank</th>
+                <th class="p-3">Scheduled Date</th>
+                <th class="p-3">Blood Type</th>
+                <th class="p-3">Fulfillment Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700" id="appointments-ledger-body">
+              <!-- Dynamically populated entries -->
+              <tr>
+                <td colspan="5" class="p-4 text-center text-slate-400">No scheduled appointments found in ledger.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="w-full py-4 text-center text-[10px] text-slate-500 border-t border-outline-variant bg-white mt-8">
+    © 2026 Karachi Centralized Blood Bank Portal. Safeguarded logs.
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/js/utils.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    // 1. Route guard
+    Utils.requireAuth(['donor']);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let activeUser = Utils.getCurrentUser();
+      let eligibilityDays = 0;
+      let isEligible = true;
+
+      // Select redirect fields if triggered by map
+      const urlParams = new URLSearchParams(window.location.search);
+      const preselectedBankId = urlParams.get('bankId');
+
+      // Populate basic info
+      document.getElementById('user-display-name').innerText = activeUser.name;
+      document.getElementById('donor-greeting-name').innerText = activeUser.name.split(' ')[0];
+      document.getElementById('user-blood-type').innerText = Utils.formatBloodType(activeUser.bloodType);
+
+      // Wire Slot Buttons
+      const slotHidden = document.getElementById('booking-slot');
+      document.querySelectorAll('.slot-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.slot-btn').forEach(b => {
+            b.classList.remove('bg-primary', 'text-white', 'border-primary', 'font-bold');
+            b.classList.add('border-slate-300', 'text-slate-700');
+          });
+          btn.classList.remove('border-slate-300', 'text-slate-700');
+          btn.classList.add('bg-primary', 'text-white', 'border-primary', 'font-bold');
+          slotHidden.value = btn.getAttribute('data-time');
+        });
+      });
+
+      // Load Donor Profile details (sync with DB)
+      async function syncProfile() {
+        try {
+          const res = await API.getMe();
+          if (res.success && res.data.user) {
+            activeUser = res.data.user;
+            localStorage.setItem('user', JSON.stringify(activeUser));
+            
+            // Format Donation Eligibility
+            const lastDate = activeUser.lastDonationDate ? new Date(activeUser.lastDonationDate) : null;
+            const ring = document.getElementById('eligibility-ring');
+            
+            if (activeUser.isEligibleToDonate) {
+              document.getElementById('eligibility-days').innerText = 'Eligible';
+              document.getElementById('eligibility-subtitle').innerText = 'To Donate';
+              document.getElementById('eligibility-days').classList.remove('text-rose-600');
+              document.getElementById('eligibility-days').classList.add('text-emerald-600');
+              document.getElementById('eligible-date').innerText = 'Eligible Now';
+              ring.style.strokeDashoffset = '0'; // Full ring
+              isEligible = true;
+            } else {
+              const daysLeft = activeUser.daysUntilEligible || 0;
+              document.getElementById('eligibility-days').innerText = daysLeft;
+              document.getElementById('eligibility-subtitle').innerText = 'Days Left';
+              document.getElementById('eligibility-days').classList.add('text-primary');
+              
+              const cutoff = new Date(lastDate);
+              cutoff.setMonth(cutoff.getMonth() + 3);
+              document.getElementById('eligible-date').innerText = cutoff.toLocaleDateString('en-PK', { month: 'short', day: 'numeric', year: 'numeric' });
+              
+              // Cooldown percent calculation
+              const elapsed = new Date() - lastDate;
+              const totalCooldown = cutoff - lastDate;
+              const percent = Math.min(100, Math.max(0, (elapsed / totalCooldown) * 100));
+              
+              // SVG circumference: 2 * PI * r = 2 * 3.14159 * 40 = 251.2
+              const offset = 251.2 - (251.2 * percent) / 100;
+              ring.style.strokeDashoffset = offset;
+              isEligible = false;
+            }
+
+            document.getElementById('last-donation-date').innerText = lastDate 
+              ? lastDate.toLocaleDateString('en-PK', { month: 'short', day: 'numeric', year: 'numeric' })
+              : 'Never';
+          }
+        } catch (e) {
+          console.error('Failed to sync donor profile:', e);
+        }
+      }
+
+      // Load Active Blood Banks for Booking Dropdown
+      async function loadBanks() {
+        const dropdown = document.getElementById('booking-bank');
+        try {
+          const res = await API.getBloodBanks();
+          if (res.success && res.data.length > 0) {
+            let html = '<option value="">-- Choose Facility --</option>';
+            res.data.forEach(bank => {
+              const selectedAttr = (preselectedBankId && preselectedBankId === bank._id) ? 'selected' : '';
+              html += `<option value="${bank._id}" ${selectedAttr}>${bank.name} (${bank.branch || 'Main Branch'})</option>`;
+            });
+            dropdown.innerHTML = html;
+          } else {
+            dropdown.innerHTML = '<option value="">No facilities available</option>';
+          }
+        } catch (e) {
+          dropdown.innerHTML = '<option value="">Failed to fetch facilities</option>';
+        }
+      }
+
+      // Load Donation Ledger (Booked appointments)
+      async function loadLedger() {
+        const tbody = document.getElementById('appointments-ledger-body');
+        try {
+          const res = await API.getMyAppointments();
+          if (res.success && res.data.length > 0) {
+            document.getElementById('appointments-count').innerText = `${res.data.length} appointments`;
+            let html = '';
+            res.data.forEach(appt => {
+              const statusClass = appt.status === 'completed' 
+                ? 'bg-emerald-100 text-emerald-800' 
+                : appt.status === 'pending'
+                ? 'bg-slate-100 text-slate-800'
+                : appt.status === 'confirmed'
+                ? 'bg-sky-100 text-sky-800'
+                : 'bg-rose-100 text-rose-800';
+
+              html += `
+                <tr class="hover:bg-slate-50 transition-colors">
+                  <td class="p-3 font-mono font-bold text-slate-900">${appt._id.slice(-6).toUpperCase()}</td>
+                  <td class="p-3">
+                    <p class="font-bold text-slate-800">${appt.bloodBankId ? appt.bloodBankId.name : 'N/A'}</p>
+                    <p class="text-[10px] text-slate-500">${appt.bloodBankId ? appt.bloodBankId.branch || 'Main' : ''}</p>
+                  </td>
+                  <td class="p-3 font-medium text-slate-600">${Utils.formatDate(appt.scheduledDate)}</td>
+                  <td class="p-3 font-bold">${Utils.formatBloodType(appt.bloodType)}</td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${statusClass}">
+                      ${appt.status}
+                    </span>
+                  </td>
+                </tr>
+              `;
+            });
+            tbody.innerHTML = html;
+          } else {
+            document.getElementById('appointments-count').innerText = '0 appointments';
+            tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">No scheduled appointments found in ledger.</td></tr>`;
+          }
+        } catch (e) {
+          tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-rose-500">Failed to load donation ledger.</td></tr>`;
+        }
+      }
+
+      // Load Local Shortages matching donor's blood type
+      async function loadShortages() {
+        const shortagesDiv = document.getElementById('shortages-hotspots');
+        try {
+          const res = await API.getBloodBanks();
+          if (res.success && res.data.length > 0) {
+            let html = '';
+            let alertFound = false;
+
+            res.data.forEach(bank => {
+              const myBt = activeUser.bloodType;
+              // Check if inventory has this blood type and if it falls below threshold
+              const entry = bank.inventory[myBt];
+              const threshold = bank.alertThreshold || 10;
+              const units = entry ? entry.units : 0;
+              
+              if (units <= threshold) {
+                alertFound = true;
+                const progressWidth = Math.min(100, (units / (threshold * 2)) * 100);
+                
+                html += `
+                  <div class="p-2 border border-rose-100 bg-rose-50/50 rounded-lg flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-1">
+                      <p class="font-bold text-slate-800 text-xs">${bank.name}</p>
+                      <span class="text-[9px] bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded uppercase">Critical</span>
+                    </div>
+                    <div class="my-2 inline-flex items-center gap-1 self-start bg-rose-700 text-white px-2 py-1 rounded text-[10px] font-black uppercase tracking-wide">
+                      <span class="material-symbols-outlined text-[13px]">bloodtype</span>
+                      ${Utils.formatBloodType(myBt)} needed here
+                    </div>
+                    <p class="text-[10px] text-slate-500">${bank.address}</p>
+                    <div class="mt-2 flex justify-between items-center text-[10px]">
+                      <span class="font-bold text-rose-700">${Utils.formatBloodType(myBt)} stock: ${units} units</span>
+                      <span class="text-slate-400">Alert Limit: ${threshold}</span>
+                    </div>
+                  </div>
+                `;
+              }
+            });
+
+            if (alertFound) {
+              shortagesDiv.innerHTML = html;
+            } else {
+              shortagesDiv.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">All facilities report stable levels for your blood type.</p>`;
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Handle Appointment Submit
+      const bookingForm = document.getElementById('appointment-form');
+      bookingForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!isEligible) {
+          Utils.showToast(`You cannot schedule a new appointment yet. Please wait until your cooldown period ends.`, 'error');
+          return;
+        }
+
+        const bankId = document.getElementById('booking-bank').value;
+        const dateVal = document.getElementById('booking-date').value;
+        const slotVal = document.getElementById('booking-slot').value;
+
+        if (!bankId || !dateVal || !slotVal) {
+          Utils.showToast('Please select a facility, date, and time slot.', 'warning');
+          return;
+        }
+
+        const scheduledDateISO = `${dateVal}T${slotVal === '09:00 AM' ? '09:00:00' : slotVal === '10:30 AM' ? '10:30:00' : slotVal === '12:00 PM' ? '12:00:00' : slotVal === '01:30 PM' ? '13:30:00' : slotVal === '03:00 PM' ? '15:00:00' : '16:30:00'}.000Z`;
+
+        const submitBtn = document.getElementById('submit-booking-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Processing Booking Request...";
+
+        try {
+          const res = await API.bookAppointment(bankId, scheduledDateISO, activeUser.bloodType);
+          if (res.success) {
+            Utils.showToast('Appointment booked successfully!', 'success');
+            bookingForm.reset();
+            // Clear slot selection styling
+            document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('bg-primary', 'text-white', 'border-primary', 'font-bold'));
+            slotHidden.value = '';
+            
+            // Reload views
+            loadLedger();
+          }
+        } catch (err) {
+          Utils.showToast(err.message || 'Failed to book appointment. Verify inputs.', 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `
+            <span class="material-symbols-outlined text-sm">event_available</span>
+            Confirm Appointment Schedule
+          `;
+        }
+      });
+
+      // Initialize Page Actions
+      syncProfile().then(() => {
+        loadBanks();
+        loadLedger();
+        loadShortages();
+      });
+    });
+  </script>
+</body>
+</html>

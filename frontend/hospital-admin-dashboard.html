@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Hospital Dashboard — HEMA-KHI Portal</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+
+  <!-- Tailwind Theme overrides -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#760009",
+            "on-primary": "#ffffff",
+            "primary-container": "#991b1b",
+            "on-primary-container": "#ffaaa1",
+            "secondary": "#565e74",
+            "background": "#f8f9ff",
+            "on-background": "#0b1c30",
+            "surface": "#ffffff",
+            "on-surface": "#0b1c30",
+            "on-surface-variant": "#59413e",
+            "surface-container-low": "#eff4ff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#dce9ff",
+            "surface-container-highest": "#d3e4fe",
+            "outline": "#8d706d",
+            "outline-variant": "#e1bfbb",
+            "error": "#ba1a1a",
+            "on-error": "#ffffff",
+            "error-container": "#ffdad6",
+            "on-error-container": "#93000a"
+          },
+          borderRadius: {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          spacing: {
+            "base": "4px",
+            "gutter": "20px",
+            "xl": "40px",
+            "lg": "24px",
+            "sm": "8px",
+            "md": "16px",
+            "container-max": "1280px",
+            "margin": "24px",
+            "xs": "4px"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-background text-on-background font-sans min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- TopNavBar Shared Header -->
+  <header class="sticky top-0 z-50 flex justify-between items-center w-full px-margin h-16 bg-white border-b border-outline-variant">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+      <span class="text-md font-bold text-primary">HEMA-KHI Portal</span>
+    </div>
+    
+    <nav class="hidden md:flex gap-lg items-center h-full">
+      <a class="h-full flex items-center px-sm text-primary border-b-2 border-primary font-bold text-xs" href="#">Hospital Dashboard</a>
+      <a class="h-full flex items-center px-sm text-on-surface-variant hover:text-primary transition-colors text-xs font-medium" href="/">Public Map</a>
+    </nav>
+
+    <div class="flex items-center gap-sm">
+      <div class="text-right hidden sm:block">
+        <p class="text-xs font-bold text-slate-900" id="user-display-name">Loading...</p>
+        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-wide" id="user-entity-branch">Hospital Admin</p>
+      </div>
+      <button onclick="Utils.logout()" class="ml-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-1.5 px-3 rounded-lg font-bold transition-colors">
+        Log Out
+      </button>
+    </div>
+  </header>
+
+  <div class="flex-grow max-w-container-max w-full mx-auto p-4 md:p-lg flex flex-col gap-6">
+    <!-- Page Header -->
+    <div>
+      <h1 class="text-2xl font-bold text-on-surface" id="hospital-title-name">Hospital Admin Panel</h1>
+      <p class="text-sm text-on-surface-variant mt-1">Request emergency blood units and track fulfillment rates.</p>
+    </div>
+
+    <!-- Layout Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left Column: Request Form (Col 1-4) -->
+      <div class="lg:col-span-4 bg-white border border-outline-variant rounded-xl p-md flex flex-col justify-between shadow-sm">
+        <div>
+          <h3 class="text-md font-bold mb-4 flex items-center gap-2 text-slate-800">
+            <span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">emergency</span>
+            Create Emergency Request
+          </h3>
+          
+          <form id="request-form" class="space-y-4">
+            <div>
+              <label for="blood-type" class="block text-xs font-bold text-slate-600 uppercase mb-1">Blood Type Required</label>
+              <select id="blood-type" required class="w-full border border-slate-300 rounded-lg py-2 px-3 text-xs bg-white text-slate-800 focus:ring-primary focus:border-primary outline-none">
+                <option value="O_negative">O-</option>
+                <option value="O_positive">O+</option>
+                <option value="A_negative">A-</option>
+                <option value="A_positive">A+</option>
+                <option value="B_negative">B-</option>
+                <option value="B_positive">B+</option>
+                <option value="AB_negative">AB-</option>
+                <option value="AB_positive">AB+</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="units" class="block text-xs font-bold text-slate-600 uppercase mb-1">Units Required</label>
+                <input id="units" type="number" required min="1" max="50" value="1" class="w-full border border-slate-300 rounded-lg py-2 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+              </div>
+              
+              <div>
+                <label for="urgency" class="block text-xs font-bold text-slate-600 uppercase mb-1">Urgency Level</label>
+                <select id="urgency" required class="w-full border border-slate-300 rounded-lg py-2 px-3 text-xs bg-white text-slate-800 focus:ring-primary focus:border-primary outline-none">
+                  <option value="Normal">Normal</option>
+                  <option value="Urgent">Urgent</option>
+                  <option value="Critical">Critical</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="case-type" class="block text-xs font-bold text-slate-600 uppercase mb-1">Case Type</label>
+                <select id="case-type" required class="w-full border border-slate-300 rounded-lg py-2 px-3 text-xs bg-white text-slate-800 focus:ring-primary focus:border-primary outline-none">
+                  <option value="Accident">Accident / Trauma</option>
+                  <option value="Surgery">Surgery</option>
+                  <option value="Thalassemia">Thalassemia</option>
+                  <option value="Cancer">Cancer / Oncology</option>
+                  <option value="Kidney_Disease">Kidney Disease</option>
+                  <option value="Childbirth">Childbirth</option>
+                  <option value="Other">Other Emergency</option>
+                </select>
+              </div>
+              
+              <div>
+                <label for="ward" class="block text-xs font-bold text-slate-600 uppercase mb-1">Ward / Department</label>
+                <input id="ward" type="text" placeholder="e.g. ICU, ER" class="w-full border border-slate-300 rounded-lg py-2 px-3 text-xs text-slate-800 focus:ring-primary focus:border-primary outline-none">
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <button type="submit" form="request-form" id="submit-btn" class="w-full mt-6 bg-primary text-on-primary py-2.5 rounded-lg text-xs font-bold hover:bg-primary-container transition-colors shadow-sm flex items-center justify-center gap-1">
+          <span class="material-symbols-outlined text-sm">campaign</span>
+          Broadcast Request City-Wide
+        </button>
+      </div>
+
+      <!-- Right Column: Requests list (Col 5-12) -->
+      <div class="lg:col-span-8 bg-white border border-outline-variant rounded-xl p-md shadow-sm">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+          <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">receipt_long</span>
+            Your Hospital's Live Requests
+          </h3>
+          <span class="text-[10px] text-slate-500 font-bold" id="requests-count">0 Open Requests</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold">
+                <th class="p-3">Reference ID</th>
+                <th class="p-3">Blood Type</th>
+                <th class="p-3">Case Info</th>
+                <th class="p-3">Urgency</th>
+                <th class="p-3">Fulfillment</th>
+                <th class="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700" id="requests-table-body">
+              <tr>
+                <td colspan="6" class="p-4 text-center text-slate-400">No active blood requests.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="w-full py-4 text-center text-[10px] text-slate-500 border-t border-outline-variant bg-white mt-8">
+    © 2026 Karachi Centralized Blood Bank Portal. Safeguarded logs.
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/js/utils.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    // Route guard
+    Utils.requireAuth(['hospital_admin']);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let activeUser = Utils.getCurrentUser();
+      let hospitalId = null;
+
+      // Populate user info
+      document.getElementById('user-display-name').innerText = activeUser.name;
+
+      // Sync data to get associated Hospital
+      async function syncData() {
+        try {
+          const profileRes = await API.getMe();
+          if (profileRes.success && profileRes.data.user) {
+            const user = profileRes.data.user;
+            localStorage.setItem('user', JSON.stringify(user));
+
+            const hospital = user.associatedEntityId;
+            if (!hospital) {
+              Utils.showToast('Error: No hospital associated with your profile.', 'error');
+              return;
+            }
+
+            if (!hospital._id || !hospital.name || !hospital.shortCode) {
+              console.error('Incomplete hospital data:', hospital);
+              Utils.showToast('Error: Hospital data is incomplete.', 'error');
+              return;
+            }
+
+            hospitalId = hospital._id;
+
+            document.getElementById('user-entity-branch').innerText = `${hospital.name} Admin`;
+            document.getElementById('hospital-title-name').innerText = `${hospital.name} (${hospital.shortCode})`;
+
+            // Load Requests
+            loadRequests();
+          }
+        } catch (e) {
+          console.error(e);
+          Utils.showToast('Failed to retrieve hospital details.', 'error');
+        }
+      }
+
+      // Load Requests and filter on hospitalId
+      async function loadRequests() {
+        const tbody = document.getElementById('requests-table-body');
+        try {
+          const res = await API.getAllRequests();
+          if (res.success && res.data.length > 0) {
+            // Filter requests for our hospital
+            const myRequests = res.data.filter(r => r.hospitalId && r.hospitalId._id === hospitalId);
+            document.getElementById('requests-count').innerText = `${myRequests.length} Requests`;
+
+            if (myRequests.length > 0) {
+              let html = '';
+              myRequests.forEach(req => {
+                const urgencyClass = req.urgency === 'Critical' 
+                  ? 'bg-rose-100 text-rose-800 border-rose-200 font-bold' 
+                  : req.urgency === 'Urgent'
+                  ? 'bg-amber-100 text-amber-800 border-amber-200'
+                  : 'bg-slate-100 text-slate-800 border-slate-200';
+
+                const progressWidth = Math.min(100, (req.unitsFulfilled / req.unitsRequested) * 100);
+
+                html += `
+                  <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-3 font-mono font-bold text-slate-900">${req._id.slice(-6).toUpperCase()}</td>
+                    <td class="p-3 font-bold text-slate-800">${Utils.formatBloodType(req.bloodTypeRequired)}</td>
+                    <td class="p-3">
+                      <p class="font-bold text-slate-800">${req.patientInfo ? req.patientInfo.caseType.replace('_', ' ') : 'N/A'}</p>
+                      <p class="text-[10px] text-slate-500">Ward: ${req.patientInfo ? req.patientInfo.wardOrDept || 'General' : 'N/A'}</p>
+                    </td>
+                    <td class="p-3">
+                      <span class="px-2 py-0.5 border text-[10px] uppercase rounded ${urgencyClass}">
+                        ${req.urgency}
+                      </span>
+                    </td>
+                    <td class="p-3">
+                      <div class="flex items-center gap-2">
+                        <span class="font-bold text-slate-800">${req.unitsFulfilled} / ${req.unitsRequested}</span>
+                        <div class="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                          <div class="h-full bg-emerald-500" style="width: ${progressWidth}%;"></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="p-3 text-right">
+                      ${req.status !== 'Closed' 
+                        ? `<button onclick="closeRequest('${req._id}')" class="bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded text-[10px] font-bold transition-all shadow-sm">Soft Close</button>`
+                        : `<span class="text-slate-400 font-bold text-[9px] uppercase">Closed</span>`
+                      }
+                    </td>
+                  </tr>
+                `;
+              });
+              tbody.innerHTML = html;
+            } else {
+              tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">No blood requests posted by your hospital.</td></tr>`;
+            }
+          } else {
+            tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">No blood requests posted by your hospital.</td></tr>`;
+          }
+        } catch (e) {
+          tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-rose-500">Failed to load requests list.</td></tr>`;
+        }
+      }
+
+      // Close a Request
+      window.closeRequest = async (id) => {
+        if (!confirm('Are you sure you want to close this emergency request?')) return;
+        try {
+          const res = await API.deleteRequest(id);
+          Utils.showToast('Blood request marked as closed.', 'success');
+          loadRequests();
+        } catch (e) {
+          Utils.showToast('Failed to close request: ' + e.message, 'error');
+        }
+      };
+
+      // Handle Form Submit
+      const form = document.getElementById('request-form');
+      const submitBtn = document.getElementById('submit-btn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const bloodTypeRequired = document.getElementById('blood-type').value;
+        const unitsRequested = parseInt(document.getElementById('units').value, 10);
+        const urgency = document.getElementById('urgency').value;
+        const caseType = document.getElementById('case-type').value;
+        const wardOrDept = document.getElementById('ward').value;
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Broadcasting Emergency Alert...";
+
+        const data = {
+          bloodTypeRequired,
+          unitsRequested,
+          urgency,
+          patientInfo: {
+            caseType,
+            wardOrDept
+          }
+        };
+
+        try {
+          const res = await API.createRequest(data);
+          if (res.success) {
+            Utils.showToast('Emergency request broadcasted successfully!', 'success');
+            form.reset();
+            loadRequests();
+          }
+        } catch (err) {
+          Utils.showToast(err.message || 'Failed to create request.', 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `
+            <span class="material-symbols-outlined text-sm">campaign</span>
+            Broadcast Request City-Wide
+          `;
+        }
+      });
+
+      // Initial Sync
+      syncData();
+    });
+  </script>
+</body>
+</html>
