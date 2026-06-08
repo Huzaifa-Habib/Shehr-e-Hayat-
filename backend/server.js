@@ -79,7 +79,7 @@ app.use(
           "https://unpkg.com",
         ],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://unpkg.com", "https://*.cartodb.com"],
+        imgSrc: ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://unpkg.com", "https://*.cartodb.com, https://*.cartocdn.com"],
         connectSrc: ["'self'"],
       },
     },
@@ -87,17 +87,32 @@ app.use(
 );
 
 // Configure CORS with explicit origin checks
-const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5500';
+// Configure CORS with dynamic multi-origin tracking
+const allowedOrigins = [
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+  'http://localhost:3000',
+  'https://shehr-e-hayat.vercel.app'
+];
+
+// Push environment-specific origin if configured via dashboard
+if (process.env.CORS_ORIGIN) {
+  allowedOrigins.push(process.env.CORS_ORIGIN);
+}
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, or postman in development)
+      // 1. Allow internal requests, same-origin, or local dev tracking flags
       if (!origin || NODE_ENV === 'development') {
         return callback(null, true);
       }
-      if (origin === allowedOrigin) {
+      
+      // 2. Grant access if matching verified origins or Vercel preview deployment extensions
+      if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
         return callback(null, true);
       }
+      
       return callback(new Error('Blocked by CORS policy: origin not allowed.'), false);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
