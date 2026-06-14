@@ -31,10 +31,7 @@ const hasValidationErrors = (req, res) => {
 const getAllRequests = async (req, res) => {
   try {
     const { status, urgency, bloodType } = req.query;
-
     const filter = {};
-
-    // Default filter: non-expired, non-closed requests
     if (status) {
       filter.status = status;
     } else {
@@ -49,12 +46,9 @@ const getAllRequests = async (req, res) => {
     if (bloodType) {
       filter.bloodTypeRequired = bloodType;
     }
-
     const requests = await BloodRequest.find(filter)
       .populate('hospitalId', 'name shortCode address contact')
       .populate('postedBy', 'name email');
-
-    // Sort by urgency priority (Critical -> Urgent -> Normal), then by createdAt descending
     const urgencyPriority = {
       [URGENCY_LEVELS.CRITICAL]: 1,
       [URGENCY_LEVELS.URGENT]: 2,
@@ -69,7 +63,6 @@ const getAllRequests = async (req, res) => {
       }
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
-
     return res.status(200).json({
       success: true,
       count: requests.length,

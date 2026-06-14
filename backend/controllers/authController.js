@@ -131,9 +131,7 @@ const register = async (req, res) => {
   try {
     // 1. Validate input
     if (hasValidationErrors(req, res)) return;
-
     const { name, email, phone, password, bloodType } = req.body;
-
     // 2. Check for duplicate email
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -142,10 +140,8 @@ const register = async (req, res) => {
         message: 'An account with this email already exists.',
       });
     }
-
     // 3. Hash password
     const passwordHash = await User.hashPassword(password);
-
     // 4. Create user (donor-only, auto-verified)
     const user = await User.create({
       name,
@@ -156,7 +152,6 @@ const register = async (req, res) => {
       role:       ROLES.DONOR,
       isVerified: true,
     });
-
     // 5. Audit log
     await AuditLog.record({
       userId:           user._id,
@@ -166,7 +161,6 @@ const register = async (req, res) => {
       newValue:         { name, email, role: ROLES.DONOR, bloodType },
       ipAddress:        req.ip,
     });
-
     // 6. Generate JWT
     const token = signToken(user);
 

@@ -476,7 +476,19 @@
 
         // 4. Update Marquee Alerts
         let marqueeHtml = '';
-        if (openRequests.length > 0) {
+        const criticalCount = shortagesRes.success ? shortagesRes.data.length : 0;
+
+        if (openRequests.length > 0 || criticalCount > 0) {
+          if (criticalCount > 0) {
+            marqueeHtml += `
+              <span class="mx-8 flex items-center gap-1 shrink-0">
+                <span class="material-symbols-outlined text-[16px] text-yellow-300 leading-none">warning</span>
+                <span class="bg-rose-900 px-1 py-0.5 rounded">CRITICAL:</span>
+                ${criticalCount} blood type shortage${criticalCount > 1 ? 's' : ''} detected across the network.
+              </span>
+            `;
+          }
+
           openRequests.forEach(req => {
             const urgencyBg    = req.urgency === 'Critical' ? 'bg-rose-900 px-1 py-0.5 rounded' : '';
             const unitsNeeded  = Math.max(0, (req.unitsRequested || 0) - (req.unitsFulfilled || 0));
@@ -494,7 +506,7 @@
           marqueeHtml = `
             <span class="mx-8 flex items-center gap-1 shrink-0">
               <span class="material-symbols-outlined text-[16px] text-emerald-300 leading-none">check_circle</span>
-              All nodes synced. No critical active emergency hospital requests city-wide.
+              All nodes synced. No critical shortages or active hospital requests city-wide.
             </span>
           `;
         }

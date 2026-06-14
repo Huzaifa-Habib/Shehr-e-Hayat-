@@ -107,10 +107,8 @@ const updateInventoryValidation = [
 const updateInventory = async (req, res) => {
   try {
     if (hasValidationErrors(req, res)) return;
-
     const { id } = req.params;
     const { bloodType, units } = req.body;
-
     // Entity ownership check: if blood_bank_admin, verify req.user.associatedEntityId matches id
     if (req.user.role === 'blood_bank_admin' && (!req.user.associatedEntityId || req.user.associatedEntityId.toString() !== id)) {
       return res.status(403).json({
@@ -118,7 +116,6 @@ const updateInventory = async (req, res) => {
         message: 'Access denied. You can only update inventory for your associated blood bank.',
       });
     }
-
     const bank = await BloodBank.findById(id);
     if (!bank) {
       return res.status(404).json({
@@ -126,16 +123,13 @@ const updateInventory = async (req, res) => {
         message: 'Blood bank not found.',
       });
     }
-
     // Capture previousValue for audit
     const previousValue = {
       bloodType,
       units: bank.inventory[bloodType] ? bank.inventory[bloodType].units : 0,
     };
-
     // Update inventory using instance method
     await bank.updateInventoryEntry(bloodType, units);
-
     // Record UPDATE_INVENTORY audit log
     await AuditLog.record({
       userId: req.user.id,

@@ -32,7 +32,6 @@ const CASE_TYPES = Object.freeze([
 const DEFAULT_EXPIRY_HOURS = 48;
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
-
 const bloodRequestSchema = new mongoose.Schema(
   {
     hospitalId: {
@@ -40,14 +39,11 @@ const bloodRequestSchema = new mongoose.Schema(
       ref:      'Hospital',
       required: [true, 'Hospital ID is required.'],
     },
-
-    // The hospital_admin who posted this request
     postedBy: {
       type:     mongoose.Schema.Types.ObjectId,
       ref:      'User',
       required: [true, 'Posted-by user ID is required.'],
     },
-
     patientInfo: {
       wardOrDept: {
         type:    String,
@@ -63,7 +59,6 @@ const bloodRequestSchema = new mongoose.Schema(
         required: [true, 'Case type is required.'],
       },
     },
-
     bloodTypeRequired: {
       type:     String,
       required: [true, 'Blood type is required.'],
@@ -72,15 +67,12 @@ const bloodRequestSchema = new mongoose.Schema(
         message: '{VALUE} is not a recognised blood type.',
       },
     },
-
     unitsRequested: {
       type:     Number,
       required: [true, 'Units requested is required.'],
       min:      [1, 'Must request at least 1 unit.'],
       max:      [50, 'Cannot request more than 50 units per request.'],
     },
-
-    // Updated as donors fulfil units — never exceeds unitsRequested
     unitsFulfilled: {
       type:    Number,
       default: 0,
